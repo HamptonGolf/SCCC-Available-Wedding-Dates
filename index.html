@@ -170,10 +170,10 @@
         </div>
     </div>
     <script>
-        let currentMonth = 0; // January
-        let currentYear = 2025;
+        let currentMonth = new Date().getMonth(); // Current month
+        let currentYear = new Date().getFullYear();
         const availableDates = [
-            '2025-02-15', '2025-02-22', '2025-02-23', '2025-03-01', '2025-03-02', '2025-03-08', '2025-03-09', '2025-03-16', 
+            '2025-02-22', '2025-02-23', '2025-03-01', '2025-03-02', '2025-03-08', '2025-03-09', '2025-03-16', 
             '2025-03-22', '2025-03-23', '2025-03-29', '2025-03-30', '2025-04-05', '2025-04-06', '2025-04-13', '2025-04-19', 
             '2025-04-26', '2025-04-27', '2025-05-03', '2025-05-04', '2025-05-10', '2025-05-17', '2025-05-18', '2025-05-24', 
             '2025-05-25', '2025-05-31', '2025-06-07', '2025-06-14', '2025-06-15', '2025-06-21', '2025-06-22', '2025-06-28', 
@@ -246,7 +246,7 @@
         document.getElementById('prev-month').addEventListener('click', prevMonth);
         document.getElementById('next-month').addEventListener('click', nextMonth);
 
-        createCalendar(currentMonth, currentYear); // Initial call to display the first month
+        createCalendar(currentMonth, currentYear); // Initial call to display the current month
     </script>
 </body>
 </html>
