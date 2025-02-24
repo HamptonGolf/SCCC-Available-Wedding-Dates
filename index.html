@@ -170,10 +170,10 @@
         </div>
     </div>
     <script>
-        let currentMonth = new Date().getMonth(); // Current month
+        let currentMonth = new Date().getMonth(); // Current month (0-11)
         let currentYear = new Date().getFullYear();
         const availableDates = [
-            '2025-02-22', '2025-02-23', '2025-03-01', '2025-03-02', '2025-03-08', '2025-03-09', '2025-03-16', 
+            '2025-03-01', '2025-03-02', '2025-03-08', '2025-03-09', '2025-03-16', 
             '2025-03-22', '2025-03-23', '2025-03-29', '2025-03-30', '2025-04-05', '2025-04-06', '2025-04-13', '2025-04-19', 
             '2025-04-26', '2025-04-27', '2025-05-03', '2025-05-04', '2025-05-10', '2025-05-17', '2025-05-18', '2025-05-24', 
             '2025-05-25', '2025-05-31', '2025-06-07', '2025-06-14', '2025-06-15', '2025-06-21', '2025-06-22', '2025-06-28', 
@@ -223,6 +223,37 @@
             }
         }
 
+        function hasAvailableDates(month, year) {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let date = 1; date <= daysInMonth; date++) {
+                let checkDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
+                if (availableDates.includes(checkDate)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function findNextAvailableMonth(startMonth, startYear) {
+            let month = startMonth;
+            let year = startYear;
+            while (true) {
+                if (hasAvailableDates(month, year)) {
+                    return { month, year };
+                }
+                if (month === 11) {
+                    month = 0;
+                    year++;
+                } else {
+                    month++;
+                }
+                // Safety check to prevent infinite loop (e.g., if no dates are available)
+                if (year > 2025 && month > startMonth) {
+                    return { month: startMonth, year: startYear }; // Fallback to original
+                }
+            }
+        }
+
         function prevMonth() {
             if (currentMonth === 0) {
                 currentMonth = 11;
@@ -246,7 +277,13 @@
         document.getElementById('prev-month').addEventListener('click', prevMonth);
         document.getElementById('next-month').addEventListener('click', nextMonth);
 
-        createCalendar(currentMonth, currentYear); // Initial call to display the current month
+        // Initial display: Check if current month has available dates, otherwise find next
+        if (!hasAvailableDates(currentMonth, currentYear)) {
+            const nextAvailable = findNextAvailableMonth(currentMonth, currentYear);
+            currentMonth = nextAvailable.month;
+            currentYear = nextAvailable.year;
+        }
+        createCalendar(currentMonth, currentYear);
     </script>
 </body>
 </html>
