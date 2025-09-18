@@ -3,180 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>St. Cloud Country Club Wedding Dates Calendar</title>
+    <title>St. Cloud Country Club - Wedding Dates</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            overflow-x: hidden;
+            height: 100%;
+        }
+        
         body {
-            font-family: 'Times New Roman', Times, serif;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 20px 40px 20px;
+            position: relative;
+            overflow-x: hidden;
         }
-        .header {
-            text-align: center;
-            padding: 20px 0;
-            background-color: rgb(1, 118, 213);
+        
+        /* Animated background elements */
+        .bg-decoration {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(1, 118, 213, 0.1) 0%, transparent 70%);
+            animation: float 20s infinite ease-in-out;
+            pointer-events: none;
+        }
+        
+        .bg-decoration:nth-child(1) {
+            top: -150px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+        
+        .bg-decoration:nth-child(2) {
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 10s;
+            background: radial-gradient(circle, rgba(36, 55, 70, 0.05) 0%, transparent 70%);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -30px) rotate(90deg); }
+            50% { transform: translate(-20px, 20px) rotate(180deg); }
+            75% { transform: translate(-30px, -20px) rotate(270deg); }
+        }
+        
+        /* Main Container */
+        .calendar-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(36, 55, 70, 0.15);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+        
+        /* Month Navigation */
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #243746 0%, #0176D5 100%);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(36, 55, 70, 0.2);
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
         }
-        .calendar-controls {
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+        
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .month-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .day-header {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+            color: #243746;
             text-align: center;
-            margin: 20px 0;
+            padding: 15px 5px;
+            border-bottom: 2px solid #0176D5;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: default;
+            z-index: 1;  /* Add base z-index */
+        }
+        
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+        
+        .calendar-day.available {
+            background: linear-gradient(135deg, #0176D5 0%, #0394ff 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(1, 118, 213, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .calendar-day.available:hover .tooltip {
+            opacity: 1;
+            z-index: 9999;  /* Ensure it stays on top when visible */
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #243746;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: #243746 transparent transparent transparent;
+        }
+        
+        .calendar-day.available:hover .tooltip {
+            opacity: 1;
+        }
+        
+        .calendar-day.unavailable {
+            background: #f5f5f5;
+            color: #ccc;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .calendar-day.unavailable::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -5%;
+            right: -5%;
+            height: 1px;
+            background: #ddd;
+            transform: rotate(-45deg);
+        }
+        
+        .calendar-day.today {
+            border: 3px solid #243746;
+            font-weight: 700;
+        }
+        
+        .calendar-day.today.available {
+            border-color: white;
+            box-shadow: 0 0 0 2px #243746, 0 4px 15px rgba(1, 118, 213, 0.3);
+        }
+        
+        /* Legend */
+        .legend {
             display: flex;
             justify-content: center;
-            align-items: center;
-        }
-        .calendar-controls button {
-            background-color: rgb(1, 118, 213);
-            color: white;
-            border: none;
-            padding: 10px 10px;
-            margin: 0 5px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .calendar-controls button:hover {
-            background-color: rgb(0, 94, 170);
-        }
-        .calendar {
-            width: 300px;
-            margin: 0 auto;
-            background-color: white;
-            border: 2px solid rgb(1, 118, 213);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .calendar table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .calendar th, .calendar td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
-            position: relative;
-        }
-        .calendar th {
-            background-color: rgb(1, 118, 213);
-            color: white;
-        }
-        .available {
-            background-color: #b3e5fc;
-            color: #01579b;
-            font-weight: bold;
-            border: 2px solid #01579b;
-            box-shadow: 0 0 5px rgba(1, 87, 155, 0.5);
-        }
-        .unavailable {
-            color: #999;
-            background-color: #f0f0f0;
-        }
-        .unavailable::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to top right, transparent calc(50% - 1px), #999 calc(50% - 1px), #999 calc(50% + 1px), transparent calc(50% + 1px));
-        }
-        #current-month-year {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0 10px;
-        }
-        .legend {
-            text-align: center;
+            gap: 30px;
             margin-top: 20px;
-            font-size: 14px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
         }
+        
         .legend-item {
-            display: inline-block;
-            margin: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .legend-color {
+        
+        .legend-dot {
             width: 20px;
             height: 20px;
-            display: inline-block;
-            margin-right: 5px;
-            vertical-align: middle;
+            border-radius: 5px;
         }
-        .available-legend {
-            background-color: #b3e5fc;
-            border: 2px solid #01579b;
+        
+        .legend-dot.available {
+            background: linear-gradient(135deg, #0176D5 0%, #0394ff 100%);
+            box-shadow: 0 2px 5px rgba(1, 118, 213, 0.3);
         }
-        .unavailable-legend {
-            background-color: #f0f0f0;
-            position: relative;
+        
+        .legend-dot.unavailable {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
         }
-        .unavailable-legend::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to top right, transparent calc(50% - 1px), #999 calc(50% - 1px), #999 calc(50% + 1px), transparent calc(50% + 1px));
+        
+        /* Notification */
+        #notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #243746 0%, #0176D5 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            text-align: center;
+            max-width: 90%;
+            display: none;
         }
-        @media (max-width: 600px) {
-            .calendar-controls {
-                flex-wrap: nowrap;
+        
+        #notification.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        #notification.hide {
+            animation: fadeOut 0.3s ease;
+        }
+        
+        #notification a {
+            color: #87CEEB;
+            text-decoration: none;
+        }
+        
+        #notification a:hover {
+            text-decoration: underline;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            to { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .calendar-container {
+                padding: 20px;
             }
-            .calendar-controls button {
-                padding: 8px 6px;
-                font-size: 12px;
+            
+            .month-display {
+                font-size: 20px;
             }
-            #current-month-year {
-                margin: 0 5px;
+            
+            .calendar-grid {
+                gap: 5px;
+            }
+            
+            .day-header {
+                font-size: 10px;
+                padding: 10px 2px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Available Wedding Dates</h1>
-    </div>
-    <div class="calendar-controls">
-        <button id="prev-month">Previous Month</button>
-        <span id="current-month-year"></span>
-        <button id="next-month">Next Month</button>
-    </div>
-    <div class="calendar">
-        <table>
-            <thead>
-                <tr>
-                    <th>Sun</th>
-                    <th>Mon</th>
-                    <th>Tue</th>
-                    <th>Wed</th>
-                    <th>Thu</th>
-                    <th>Fri</th>
-                    <th>Sat</th>
-                </tr>
-            </thead>
-            <tbody id="calendar-body">
-                <!-- Calendar days will be dynamically added here -->
-            </tbody>
-        </table>
-    </div>
-    <div class="legend">
-        <div class="legend-item">
-            <span class="legend-color available-legend"></span> Available Dates
+    <div class="bg-decoration"></div>
+    <div class="bg-decoration"></div>
+    
+    <div class="calendar-container">
+        <div class="month-nav">
+            <button class="nav-btn" id="prev-btn">‹</button>
+            <div class="month-display" id="month-display">Loading...</div>
+            <button class="nav-btn" id="next-btn">›</button>
         </div>
-        <div class="legend-item">
-            <span class="legend-color unavailable-legend"></span> Unavailable Dates
+        
+        <div class="calendar-grid" id="calendar-grid">
+            <!-- Calendar will be generated here -->
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot available"></div>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot unavailable"></div>
+                <span>Unavailable</span>
+            </div>
         </div>
     </div>
+    
+    <!-- Single notification element -->
+    <div id="notification">
+        <h3 style="margin: 0 0 10px 0; font-size: 24px; font-family: 'Playfair Display', serif;">
+            Available Date Selected
+        </h3>
+        <p id="notification-date" style="margin: 0; font-size: 16px;"></p>
+        <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 14px;">
+            Contact <a href="mailto:pgaetz@stcloudcountryclub.com">pgaetz@stcloudcountryclub.com</a> to reserve this date!
+        </p>
+    </div>
+    
     <script>
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
         const availableDates = [
             '2025-04-13', '2025-04-19', '2025-04-26', '2025-04-27', '2025-05-03', 
             '2025-05-04', '2025-05-10', '2025-05-17', '2025-05-18', '2025-05-24', 
             '2025-05-25', '2025-05-31', '2025-06-07', '2025-06-14', '2025-06-15', 
             '2025-06-21', '2025-06-22', '2025-06-28', '2025-06-29', '2025-07-12', 
-            '2025-07-13', '2025-07-26', '2025-07-27', '2025-08-10', 
+            '2025-07-13', '2025-07-26', '2025-07-27', '2025-08-09', '2025-08-10', 
             '2025-08-23', '2025-08-24', '2025-08-30', '2025-08-31', '2025-09-14', 
             '2025-09-27', '2025-09-28', '2025-10-04', '2025-10-05', '2025-10-18', 
             '2025-10-19', '2025-10-25', '2025-10-26', '2025-11-01', '2025-11-02', 
@@ -185,120 +394,206 @@
             '2025-12-13', '2025-12-14', '2025-12-20', '2025-12-21', '2025-12-27', 
             '2025-12-28'
         ];
-
-        // Filter out past dates
-        function filterPastDates(dates) {
+        
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let notificationTimeout = null;
+        
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        function isDateAvailable(dateStr) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalize to start of day
-            return dates.filter(date => {
-                const dateObj = new Date(date);
-                return dateObj >= today;
+            today.setHours(0, 0, 0, 0);
+            const checkDate = new Date(dateStr + 'T00:00:00'); // Ensure proper date parsing
+            return checkDate >= today && availableDates.includes(dateStr);
+        }
+        
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function formatDateForTooltip(dateStr) {
+            const [year, month, day] = dateStr.split('-');
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+            const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+            return `${dayName}, ${monthName} ${parseInt(day)}`;
+        }
+        
+        function renderCalendar() {
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const prevLastDay = new Date(currentYear, currentMonth, 0);
+            
+            const firstDayOfWeek = firstDay.getDay();
+            const lastDayOfMonth = lastDay.getDate();
+            const prevLastDayOfMonth = prevLastDay.getDate();
+            
+            const monthDisplay = document.getElementById('month-display');
+            monthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            const calendarGrid = document.getElementById('calendar-grid');
+            calendarGrid.innerHTML = '';
+            
+            // Add day headers
+            dayNames.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
             });
-        }
-
-        // Apply filter to availableDates
-        let filteredAvailableDates = filterPastDates(availableDates);
-
-        function createCalendar(month, year) {
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const firstDay = new Date(year, month, 1).getDay();
-
-            let calendarBody = document.getElementById('calendar-body');
-            calendarBody.innerHTML = '';
-            document.getElementById('current-month-year').textContent = `${months[month]} ${year}`;
-
-            let date = 1;
-
-            for (let i = 0; i < 6; i++) {
-                let row = document.createElement('tr');
-
-                for (let j = 0; j < 7; j++) {
-                    if (i === 0 && j < firstDay) {
-                        let cell = document.createElement('td');
-                        row.appendChild(cell);
-                    } else if (date > daysInMonth) {
-                        break;
-                    } else {
-                        let cell = document.createElement('td');
-                        let cellText = document.createTextNode(date);
-                        cell.appendChild(cellText);
-                        
-                        let checkDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
-                        if (filteredAvailableDates.includes(checkDate)) {
-                            cell.classList.add('available');
-                        } else {
-                            cell.classList.add('unavailable');
-                        }
-                        row.appendChild(cell);
-                        date++;
-                    }
-                }
-                calendarBody.appendChild(row);
+            
+            // Add previous month's trailing days
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.textContent = prevLastDayOfMonth - i;
+                calendarGrid.appendChild(dayDiv);
             }
-        }
-
-        function hasAvailableDates(month, year) {
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            for (let date = 1; date <= daysInMonth; date++) {
-                let checkDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
-                if (filteredAvailableDates.includes(checkDate)) {
-                    return true;
+            
+            // Add current month's days
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let day = 1; day <= lastDayOfMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.textContent = day;
+                
+                const currentDateObj = new Date(currentYear, currentMonth, day);
+                const dateStr = formatDate(currentDateObj);
+                
+                // Check if it's today
+                if (currentDateObj.toDateString() === today.toDateString()) {
+                    dayDiv.classList.add('today');
                 }
-            }
-            return false;
-        }
-
-        function findNextAvailableMonth(startMonth, startYear) {
-            let month = startMonth;
-            let year = startYear;
-            while (true) {
-                if (hasAvailableDates(month, year)) {
-                    return { month, year };
-                }
-                if (month === 11) {
-                    month = 0;
-                    year++;
+                
+                // Check availability
+                if (isDateAvailable(dateStr)) {
+                    dayDiv.classList.add('available');
+                    
+                    // Add tooltip
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = formatDateForTooltip(dateStr);
+                    dayDiv.appendChild(tooltip);
+                    
+                    dayDiv.addEventListener('click', () => {
+                        showDateInfo(dateStr);
+                    });
                 } else {
-                    month++;
+                    dayDiv.classList.add('unavailable');
                 }
-                // Safety check to prevent infinite loop
-                if (year > 2025 && month > startMonth) {
-                    return { month: startMonth, year: startYear };
-                }
+                
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            // Add next month's leading days
+            const totalCells = calendarGrid.children.length - 7; // Subtract header row
+            const remainingCells = 35 - totalCells; // 5 weeks * 7 days - current cells
+            
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.textContent = day;
+                calendarGrid.appendChild(dayDiv);
             }
         }
-
-        function prevMonth() {
-            if (currentMonth === 0) {
-                currentMonth = 11;
-                currentYear--;
-            } else {
+        
+        function showDateInfo(dateStr) {
+            // Clear any existing timeout
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+            }
+            
+            // Parse the date properly to avoid timezone issues
+            const [year, month, day] = dateStr.split('-');
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = date.toLocaleDateString('en-US', options);
+            
+            const notification = document.getElementById('notification');
+            const dateElement = document.getElementById('notification-date');
+            
+            // Hide first if already showing
+            notification.classList.remove('show', 'hide');
+            
+            // Update content and show
+            dateElement.textContent = formattedDate;
+            
+            // Small delay to ensure animation plays
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Set timeout to hide
+            notificationTimeout = setTimeout(() => {
+                notification.classList.add('hide');
+                setTimeout(() => {
+                    notification.classList.remove('show', 'hide');
+                }, 300);
+            }, 3000);
+        }
+        
+        function changeMonth(direction) {
+            if (direction === 'prev') {
                 currentMonth--;
-            }
-            createCalendar(currentMonth, currentYear);
-        }
-
-        function nextMonth() {
-            if (currentMonth === 11) {
-                currentMonth = 0;
-                currentYear++;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
             } else {
                 currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
             }
-            createCalendar(currentMonth, currentYear);
+            renderCalendar();
         }
-
-        document.getElementById('prev-month').addEventListener('click', prevMonth);
-        document.getElementById('next-month').addEventListener('click', nextMonth);
-
-        // Initial display: Check if current month has available dates, otherwise find next
-        if (!hasAvailableDates(currentMonth, currentYear)) {
-            const nextAvailable = findNextAvailableMonth(currentMonth, currentYear);
-            currentMonth = nextAvailable.month;
-            currentYear = nextAvailable.year;
+        
+        // Event listeners
+        document.getElementById('prev-btn').addEventListener('click', () => changeMonth('prev'));
+        document.getElementById('next-btn').addEventListener('click', () => changeMonth('next'));
+        
+        // Find and display the nearest month with available dates
+        function findNearestAvailableMonth() {
+            const today = new Date();
+            let checkMonth = today.getMonth();
+            let checkYear = today.getFullYear();
+            
+            for (let i = 0; i < 24; i++) { // Check up to 2 years ahead
+                const hasAvailable = availableDates.some(dateStr => {
+                    const date = new Date(dateStr + 'T00:00:00');
+                    return date.getMonth() === checkMonth && 
+                           date.getFullYear() === checkYear &&
+                           date >= today;
+                });
+                
+                if (hasAvailable) {
+                    currentMonth = checkMonth;
+                    currentYear = checkYear;
+                    break;
+                }
+                
+                checkMonth++;
+                if (checkMonth > 11) {
+                    checkMonth = 0;
+                    checkYear++;
+                }
+            }
         }
-        createCalendar(currentMonth, currentYear);
+        
+        // Initialize
+        findNearestAvailableMonth();
+        renderCalendar();
     </script>
 </body>
 </html>
