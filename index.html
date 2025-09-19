@@ -399,6 +399,52 @@
             color: #add8e6;
         }
         
+        /* Close button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            line-height: 1;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        /* Overlay */
+        #notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        #notification-overlay.show {
+            display: block;
+        }
+        
+        #notification-overlay.hide {
+            display: none;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
             to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -486,8 +532,12 @@
         </div>
     </div>
     
+    <!-- Overlay for notification -->
+    <div id="notification-overlay"></div>
+    
     <!-- Single notification element -->
     <div id="notification">
+        <button class="close-btn" id="close-notification">&times;</button>
         <h3 style="margin: 0 0 10px 0; font-size: 24px; font-family: 'Playfair Display', serif;">
             Available Date Selected
         </h3>
@@ -626,11 +676,6 @@
         }
         
         function showDateInfo(dateStr) {
-            // Clear any existing timeout
-            if (notificationTimeout) {
-                clearTimeout(notificationTimeout);
-            }
-            
             // Parse the date properly to avoid timezone issues
             const [year, month, day] = dateStr.split('-');
             const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
@@ -639,68 +684,36 @@
             const formattedDate = date.toLocaleDateString('en-US', options);
             
             const notification = document.getElementById('notification');
+            const overlay = document.getElementById('notification-overlay');
             const dateElement = document.getElementById('notification-date');
-            
-            // Hide first if already showing
-            notification.classList.remove('show', 'hide');
             
             // Update content and show
             dateElement.textContent = formattedDate;
             
-            // Small delay to ensure animation plays
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            
-            // Set timeout to hide - increased time to allow clicking the link
-            notificationTimeout = setTimeout(() => {
-                notification.classList.add('hide');
-                setTimeout(() => {
-                    notification.classList.remove('show', 'hide');
-                }, 300);
-            }, 5000); // Increased from 3000 to 5000ms
+            // Show overlay and notification
+            overlay.classList.remove('hide');
+            overlay.classList.add('show');
+            notification.classList.remove('hide');
+            notification.classList.add('show');
         }
         
-        // Add click handler for the notification to prevent it from closing when clicking on it
-        document.getElementById('notification').addEventListener('click', function(e) {
-            // Clear the timeout when clicking on the notification
-            if (notificationTimeout) {
-                clearTimeout(notificationTimeout);
-            }
+        function closeNotification() {
+            const notification = document.getElementById('notification');
+            const overlay = document.getElementById('notification-overlay');
             
-            // If clicking on a link, let it work normally
-            if (e.target.tagName === 'A') {
-                return;
-            }
+            notification.classList.add('hide');
+            overlay.classList.add('hide');
             
-            // Reset the timeout
-            notificationTimeout = setTimeout(() => {
-                this.classList.add('hide');
-                setTimeout(() => {
-                    this.classList.remove('show', 'hide');
-                }, 300);
-            }, 3000);
-        });
-        
-        // Ensure email link works on all devices
-        document.addEventListener('DOMContentLoaded', function() {
-            const emailLink = document.querySelector('#notification a');
-            if (emailLink) {
-                emailLink.style.pointerEvents = 'auto';
-                emailLink.style.cursor = 'pointer';
-                
-                // Add touch event support for mobile
-                emailLink.addEventListener('touchstart', function(e) {
-                    e.stopPropagation();
-                });
-                
-                emailLink.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-        });
+            setTimeout(() => {
+                notification.classList.remove('show', 'hide');
+                overlay.classList.remove('show', 'hide');
+            }, 300);
+        }
         
         function changeMonth(direction) {
+            // Close notification when changing months
+            closeNotification();
+            
             if (direction === 'prev') {
                 currentMonth--;
                 if (currentMonth < 0) {
@@ -720,6 +733,49 @@
         // Event listeners
         document.getElementById('prev-btn').addEventListener('click', () => changeMonth('prev'));
         document.getElementById('next-btn').addEventListener('click', () => changeMonth('next'));
+        
+        // Close notification event listeners
+        document.getElementById('close-notification').addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeNotification();
+        });
+        
+        document.getElementById('notification-overlay').addEventListener('click', function() {
+            closeNotification();
+        });
+        
+        // Prevent notification from closing when clicking on it
+        document.getElementById('notification').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Ensure email link works properly on all devices including mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailLink = document.querySelector('#notification a[href^="mailto:"]');
+            if (emailLink) {
+                // Remove any existing event listeners and add fresh ones
+                const newEmailLink = emailLink.cloneNode(true);
+                emailLink.parentNode.replaceChild(newEmailLink, emailLink);
+                
+                // Ensure the link is clickable
+                newEmailLink.style.pointerEvents = 'auto';
+                newEmailLink.style.cursor = 'pointer';
+                newEmailLink.style.position = 'relative';
+                newEmailLink.style.zIndex = '1001';
+                
+                // Handle clicks and touches
+                newEmailLink.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // Let the default mailto behavior work
+                });
+                
+                newEmailLink.addEventListener('touchend', function(e) {
+                    e.stopPropagation();
+                    // For mobile devices, explicitly trigger the mailto
+                    window.location.href = this.href;
+                });
+            }
+        });
         
         // Find and display the nearest month with available dates
         function findNearestAvailableMonth() {
