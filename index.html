@@ -385,10 +385,18 @@
         #notification a {
             color: #87CEEB;
             text-decoration: none;
+            pointer-events: auto;
+            cursor: pointer;
+            display: inline-block;
+            padding: 2px 0;
         }
         
         #notification a:hover {
             text-decoration: underline;
+        }
+        
+        #notification a:active {
+            color: #add8e6;
         }
         
         @keyframes fadeIn {
@@ -644,14 +652,53 @@
                 notification.classList.add('show');
             }, 10);
             
-            // Set timeout to hide
+            // Set timeout to hide - increased time to allow clicking the link
             notificationTimeout = setTimeout(() => {
                 notification.classList.add('hide');
                 setTimeout(() => {
                     notification.classList.remove('show', 'hide');
                 }, 300);
-            }, 3000);
+            }, 5000); // Increased from 3000 to 5000ms
         }
+        
+        // Add click handler for the notification to prevent it from closing when clicking on it
+        document.getElementById('notification').addEventListener('click', function(e) {
+            // Clear the timeout when clicking on the notification
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+            }
+            
+            // If clicking on a link, let it work normally
+            if (e.target.tagName === 'A') {
+                return;
+            }
+            
+            // Reset the timeout
+            notificationTimeout = setTimeout(() => {
+                this.classList.add('hide');
+                setTimeout(() => {
+                    this.classList.remove('show', 'hide');
+                }, 300);
+            }, 3000);
+        });
+        
+        // Ensure email link works on all devices
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailLink = document.querySelector('#notification a');
+            if (emailLink) {
+                emailLink.style.pointerEvents = 'auto';
+                emailLink.style.cursor = 'pointer';
+                
+                // Add touch event support for mobile
+                emailLink.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                });
+                
+                emailLink.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
         
         function changeMonth(direction) {
             if (direction === 'prev') {
