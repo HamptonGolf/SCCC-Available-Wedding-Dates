@@ -113,6 +113,13 @@
             transform: scale(0.95);
         }
         
+        .month-display-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        
         .month-display {
             font-family: 'Playfair Display', serif;
             font-size: 28px;
@@ -121,6 +128,13 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .month-text, .year-text {
+            display: inline-block;
         }
         
         /* Calendar Grid */
@@ -152,7 +166,7 @@
             transition: all 0.3s ease;
             position: relative;
             cursor: default;
-            z-index: 1;  /* Add base z-index */
+            z-index: 1;
         }
         
         .calendar-day.other-month {
@@ -176,7 +190,7 @@
         
         .calendar-day.available:hover .tooltip {
             opacity: 1;
-            z-index: 9999;  /* Ensure it stays on top when visible */
+            z-index: 9999;
         }
         
         /* Tooltip */
@@ -199,6 +213,48 @@
             z-index: 9999;
         }
         
+        /* Adjust tooltip position for left edge (Sunday) */
+        .calendar-day:nth-child(7n + 8) .tooltip,
+        .calendar-day:nth-child(7n + 15) .tooltip,
+        .calendar-day:nth-child(7n + 22) .tooltip,
+        .calendar-day:nth-child(7n + 29) .tooltip,
+        .calendar-day:nth-child(7n + 36) .tooltip {
+            left: 0;
+            transform: translateX(0);
+        }
+        
+        /* Adjust arrow for left-aligned tooltips */
+        .calendar-day:nth-child(7n + 8) .tooltip::after,
+        .calendar-day:nth-child(7n + 15) .tooltip::after,
+        .calendar-day:nth-child(7n + 22) .tooltip::after,
+        .calendar-day:nth-child(7n + 29) .tooltip::after,
+        .calendar-day:nth-child(7n + 36) .tooltip::after {
+            left: 20px;
+            transform: translateX(0);
+        }
+        
+        /* Adjust tooltip position for right edge (Saturday) */
+        .calendar-day:nth-child(7n + 14) .tooltip,
+        .calendar-day:nth-child(7n + 21) .tooltip,
+        .calendar-day:nth-child(7n + 28) .tooltip,
+        .calendar-day:nth-child(7n + 35) .tooltip,
+        .calendar-day:nth-child(7n + 42) .tooltip {
+            left: auto;
+            right: 0;
+            transform: translateX(0);
+        }
+        
+        /* Adjust arrow for right-aligned tooltips */
+        .calendar-day:nth-child(7n + 14) .tooltip::after,
+        .calendar-day:nth-child(7n + 21) .tooltip::after,
+        .calendar-day:nth-child(7n + 28) .tooltip::after,
+        .calendar-day:nth-child(7n + 35) .tooltip::after,
+        .calendar-day:nth-child(7n + 42) .tooltip::after {
+            left: auto;
+            right: 20px;
+            transform: translateX(0);
+        }
+        
         .tooltip::after {
             content: '';
             position: absolute;
@@ -208,6 +264,31 @@
             border-width: 5px;
             border-style: solid;
             border-color: #243746 transparent transparent transparent;
+        }
+        
+        /* Mobile-specific tooltip adjustments */
+        @media (max-width: 768px) {
+            .tooltip {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+            
+            /* Even more aggressive positioning on mobile for edge cases */
+            .calendar-day:nth-child(7n + 8) .tooltip,
+            .calendar-day:nth-child(7n + 15) .tooltip,
+            .calendar-day:nth-child(7n + 22) .tooltip,
+            .calendar-day:nth-child(7n + 29) .tooltip,
+            .calendar-day:nth-child(7n + 36) .tooltip {
+                left: -10px;
+            }
+            
+            .calendar-day:nth-child(7n + 14) .tooltip,
+            .calendar-day:nth-child(7n + 21) .tooltip,
+            .calendar-day:nth-child(7n + 28) .tooltip,
+            .calendar-day:nth-child(7n + 35) .tooltip,
+            .calendar-day:nth-child(7n + 42) .tooltip {
+                right: -10px;
+            }
         }
         
         .calendar-day.available:hover .tooltip {
@@ -326,8 +407,35 @@
                 padding: 20px;
             }
             
+            .month-nav {
+                padding: 15px;
+            }
+            
+            .month-display-wrapper {
+                flex: 1;
+                text-align: center;
+            }
+            
             .month-display {
+                flex-direction: column;
+                gap: 4px;
                 font-size: 20px;
+            }
+            
+            .year-text {
+                font-size: 18px;
+                letter-spacing: 1px;
+                order: -1; /* This moves the year above the month */
+            }
+            
+            .month-text {
+                font-size: 22px;
+            }
+            
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
             }
             
             .calendar-grid {
@@ -348,7 +456,9 @@
     <div class="calendar-container">
         <div class="month-nav">
             <button class="nav-btn" id="prev-btn">‹</button>
-            <div class="month-display" id="month-display">Loading...</div>
+            <div class="month-display-wrapper">
+                <div class="month-display" id="month-display">Loading...</div>
+            </div>
             <button class="nav-btn" id="next-btn">›</button>
         </div>
         
@@ -436,7 +546,8 @@
             const prevLastDayOfMonth = prevLastDay.getDate();
             
             const monthDisplay = document.getElementById('month-display');
-            monthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            // Update to include separate spans for month and year
+            monthDisplay.innerHTML = `<span class="month-text">${monthNames[currentMonth]}</span> <span class="year-text">${currentYear}</span>`;
             
             const calendarGrid = document.getElementById('calendar-grid');
             calendarGrid.innerHTML = '';
